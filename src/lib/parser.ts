@@ -28,5 +28,28 @@ const IGNORE_LIST = [
  *      For example: <div><blockquote>Some text here</blockquote></div>. div is the top level readable element and not blockquote
  */
 export function getTopLevelReadableElementsOnPage(): HTMLElement[] {
+  const isChildTextNodeNotEmpty = (node: Element) => {
+    return node.innerHTML.trim() !== '';
+  }
 
+  const isElementNotIgnored = (elem: Element) => {
+    return !IGNORE_LIST.includes(elem.nodeName);
+  }
+
+  const isElementRoot = (elem: Element) => {
+    return elem.children.length < 2 && (!elem.parentElement || (elem.parentElement && elem.parentElement.children.length > 1));
+  }
+  
+  let readableElements: HTMLElement[] = []
+  document.querySelectorAll("body *").forEach((elem: Element) => {
+    if (isChildTextNodeNotEmpty(elem) && isElementNotIgnored(elem) && isElementRoot(elem)) {
+      let parent = elem.parentNode;
+      readableElements.push(elem as HTMLElement);
+      while (parent) {
+        readableElements = readableElements.filter((val) => !val.isEqualNode(parent));
+        parent = parent.parentNode;
+      }
+    }
+  })
+  return readableElements;
 }

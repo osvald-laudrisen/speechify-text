@@ -1,3 +1,7 @@
+import { useHoveredParagraphCoordinate } from "./hook";
+import { getTopLevelReadableElementsOnPage } from "./parser";
+import { speechify } from "./play";
+
 // This is a simple play button SVG that you can use in your hover player
 const PlayButton = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -27,4 +31,21 @@ const PlayButton = (props: React.SVGProps<SVGSVGElement>) => (
  * The hover player should contain a play button that when clicked, should play the text of the paragraph
  * This component should make use of the useHoveredParagraphCoordinate hook to get information about the hovered paragraph
  */
-export default function HoverPlayer() {}
+export default function HoverPlayer() {
+  const readableElements = getTopLevelReadableElementsOnPage();
+  const hoveredElementInfo = useHoveredParagraphCoordinate(readableElements);
+
+  return (
+    <div style={{
+      position: "absolute",
+      left: (hoveredElementInfo?.left || 0) - 24,
+      top: hoveredElementInfo?.top || 0
+    }}>
+      <PlayButton onClick={() => {
+        if (hoveredElementInfo) {
+          speechify(hoveredElementInfo.element);
+        }
+      }} />
+    </div>
+  )
+}
